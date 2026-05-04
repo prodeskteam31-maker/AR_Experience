@@ -11,7 +11,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* ── BARRE SUPÉRIEURE ── */
         .top-bar {
             position: absolute;
             top: 20px;
@@ -25,7 +24,6 @@
             pointer-events: none;
         }
 
-        /* LOGOS : grands, transparents, directement sur fond image */
         .logo-left, .logo-right {
             flex-shrink: 0;
             background: none;
@@ -43,7 +41,6 @@
             filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
         }
 
-        /* TITRE : grand, lisible, SANS boîte */
         .title {
             flex: 1;
             text-align: center;
@@ -52,16 +49,11 @@
             font-weight: 800;
             line-height: 1.5;
             letter-spacing: 0.4px;
-            text-shadow:
-                0 0 18px rgba(0,0,0,1),
-                0 2px 10px rgba(0,0,0,0.95),
-                0 0 4px rgba(0,0,0,1),
-                1px 1px 0px rgba(0,0,0,0.8);
+            text-shadow: 0 0 18px rgba(0,0,0,1), 0 2px 10px rgba(0,0,0,0.95), 0 0 4px rgba(0,0,0,1), 1px 1px 0px rgba(0,0,0,0.8);
             background: none;
             padding: 0;
         }
 
-        /* ÉTIQUETTE BAS */
         .bottom-label {
             position: fixed;
             bottom: 20px;
@@ -143,7 +135,6 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // ── SCÈNE ──
         const scene = new THREE.Scene();
         const textureLoader = new THREE.TextureLoader();
         const backgroundTexture = textureLoader.load('./models/Telemly.jpg');
@@ -151,21 +142,18 @@
         backgroundTexture.magFilter = THREE.LinearFilter;
         scene.background = backgroundTexture;
 
-        // ── CAMÉRA : éloignée = modèle petit au départ ──
         const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1.5, 14);
-        camera.lookAt(0, 0.5, 0);
+        camera.position.set(0, 2.5, 14);
+        camera.lookAt(0, 1, 0);
 
-        // ── RENDERER ──
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // ── CONTRÔLES ──
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.target.set(0, 0.5, 0);   // orbite centrée, légèrement montée
+        controls.target.set(0, 1, 0);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.rotateSpeed = 0.8;
@@ -174,7 +162,6 @@
         controls.enablePan = true;
         controls.update();
 
-        // ── ÉCLAIRAGE ──
         scene.add(new THREE.AmbientLight(0xffffff, 0.6));
         const mainLight = new THREE.DirectionalLight(0xfff5e0, 1.2);
         mainLight.position.set(3, 5, 2);
@@ -187,26 +174,21 @@
         rimLight.position.set(1, 2, -2);
         scene.add(rimLight);
 
-        // ── CHARGEMENT DU MODÈLE ──
         const loader = new GLTFLoader();
         loader.load('./models/mon-modele.glb',
             (gltf) => {
                 const model = gltf.scene;
 
-                // 1. Centrer sur l'origine
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
-                const size   = box.getSize(new THREE.Vector3());
                 model.position.sub(center);
 
-                // 2. Échelle réduite → petit au départ
                 model.scale.set(0.35, 0.35, 0.35);
-
-                // 3. Remonter le modèle (Y + 20% de sa hauteur après scale)
-                model.position.y += size.y * 0.35 * 0.20;
+                // Remonter le modèle nettement (valeur fixe 0.9)
+                model.position.y += 0.9;
 
                 scene.add(model);
-                console.log('Modèle chargé ✓');
+                console.log('Modèle chargé et remonté');
             },
             (xhr) => {
                 if (xhr.total) console.log(`${Math.round(xhr.loaded / xhr.total * 100)}%`);
@@ -216,7 +198,6 @@
             }
         );
 
-        // ── ANIMATION ──
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
@@ -224,7 +205,6 @@
         }
         animate();
 
-        // ── RESIZE ──
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
