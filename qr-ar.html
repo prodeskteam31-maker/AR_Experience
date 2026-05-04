@@ -41,24 +41,31 @@
             text-shadow: 0 0 18px black, 0 2px 10px black;
             background: none;
         }
+        /* ÉTIQUETTE ARABE EFFET NÉON / ALLUMÉ */
         .bottom-label {
             position: fixed;
             bottom: 20px;
             left: 30px;
             right: 30px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            border-radius: 12px;
-            color: white;
-            font-size: 20px;
+            padding: 16px 24px;
+            border-radius: 20px;
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 600;
             text-align: center;
             z-index: 30;
-            border: 1px solid rgba(255,215,0,0.35);
+            border: 1px solid rgba(0, 255, 255, 0.7);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.4), 0 4px 20px rgba(0,0,0,0.4);
+            text-shadow: 0 0 6px cyan, 0 0 12px #00aaff, 0 0 20px rgba(0,255,255,0.9);
+            font-family: 'Segoe UI', 'Tahoma', sans-serif;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
         #controls-hint {
             position: absolute;
-            bottom: 80px;
+            bottom: 20px;
             right: 20px;
             background: rgba(0,0,0,0.5);
             color: #ddd;
@@ -70,12 +77,12 @@
         @media (max-width: 700px) {
             .logo-left img, .logo-right img { height: 55px; }
             .title { font-size: 12px; }
-            .bottom-label { font-size: 11px; }
+            .bottom-label { font-size: 14px; padding: 12px 16px; bottom: 15px; left: 15px; right: 15px; }
         }
         @media (max-width: 480px) {
             .logo-left img, .logo-right img { height: 70px; }
             .title { font-size: 10px; }
-            .bottom-label { font-size: 10px; }
+            .bottom-label { font-size: 12px; padding: 10px 12px; }
         }
     </style>
 </head>
@@ -86,8 +93,10 @@
         <div class="logo-right"><img src="./models/Faro_s150.png" alt="Faro" onerror="this.style.display='none'"></div>
     </div>
     <div id="controls-hint">🖱️ Rotation auto | 2 doigts = déplacement</div>
+
+    <!-- TEXTE ARABE AVEC EFFET NÉON (ALLUMÉ) -->
     <div class="bottom-label">
-        يهدف هذا المشروع إلى مراقبة الانزلاقات الأرضية في منطقة الأبيار – تلملي باستخدام تقنيات حديثة، من أجل اكتشاف حركة التربة في الوقت المناسب والوقاية من الأخطار
+        ✨ يهدف هذا المشروع إلى مراقبة الانزلاقات الأرضية في منطقة الأبيار – تلملي باستخدام تقنيات حديثة، من أجل اكتشاف حركة التربة في الوقت المناسب والوقاية من الأخطار ✨
     </div>
 
     <script type="importmap">
@@ -113,7 +122,7 @@
 
         const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 1.5, 12);
-        camera.lookAt(0, 0.3, 0);
+        camera.lookAt(0, 0.2, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -121,7 +130,7 @@
         document.body.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.target.set(0, 0.3, 0);
+        controls.target.set(0, 0.2, 0);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.rotateSpeed = 0.5;
@@ -150,36 +159,28 @@
                 if (currentModel) scene.remove(currentModel);
                 currentModel = gltf.scene;
 
-                // Échelle très petite
                 currentModel.scale.set(0.06, 0.06, 0.06);
 
-                // Recalculer la boîte APRÈS l'échelle pour bien centrer
                 const box = new THREE.Box3().setFromObject(currentModel);
                 const center = box.getCenter(new THREE.Vector3());
                 currentModel.position.sub(center);
 
-                // DESCENDRE le modèle : réduire Y (0.3 au lieu de 0.4)
-                currentModel.position.y += 0.10;  // ← plus bas
+                currentModel.position.y += 0.05;  // descente
 
                 scene.add(currentModel);
-                console.log('Modèle chargé - rotation auto activée');
+                console.log('Modèle chargé');
             },
             (xhr) => console.log(`${Math.round(xhr.loaded / xhr.total * 100)}%`),
             (error) => console.error('Erreur :', error)
         );
 
-        // Variables pour la rotation automatique
-        let autoRotateAngle = 0;
-        const autoRotateSpeed = 0.01;  // vitesse de rotation (ajuste selon besoin)
+        const autoRotateSpeed = 0.01;
 
         function animate() {
             requestAnimationFrame(animate);
-
-            // Rotation automatique du modèle sur lui-même (axe Y)
             if (currentModel) {
                 currentModel.rotation.y += autoRotateSpeed;
             }
-
             controls.update();
             renderer.render(scene, camera);
         }
