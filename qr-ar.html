@@ -3,64 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>AR Experience - Telemly & El Biar</title>
+    <title>🔬 Projet de surveillance du glissement de terrain<br> 
+        📍 El Biar & Telemly – InSAR + Lasergrammétrie 3D </title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #info {
-            position: absolute; top: 20px; left: 20px;
-            background: rgba(0,0,0,0.6); color: white;
-            padding: 8px 16px; border-radius: 30px;
-            font-size: 14px; z-index: 20; backdrop-filter: blur(4px);
-            pointer-events: none;
-            max-width: 80%;
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        #controls-hint {
-            position: absolute; bottom: 20px; right: 20px;
-            background: rgba(0,0,0,0.5); color: #ccc;
-            padding: 6px 12px; border-radius: 20px;
-            font-size: 12px; z-index: 20;
-            pointer-events: none;
+        /* Conteneur des éléments de l'interface (haut et bas fixes) */
+        .ui-top {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 30;
+            gap: 10px;
+            pointer-events: none; /* Pour ne pas bloquer les interactions 3D */
         }
+        .logo-left, .logo-right {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 6px;
+            backdrop-filter: blur(4px);
+            pointer-events: auto; /* au cas où on veut cliquer plus tard */
+        }
+        .logo-left img, .logo-right img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+        .title-center {
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 40px;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.4;
+            flex: 1;
+            margin: 0 10px;
+            pointer-events: none;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+        .title-center span {
+            display: inline-block;
+        }
+        /* Étiquette fixe en bas (modifiée) */
         .ar-label {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             color: white;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-size: 12px;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 13px;
             font-weight: 500;
             font-family: 'Segoe UI', sans-serif;
             text-align: center;
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,215,0,0.5);
             max-width: 85%;
             white-space: normal;
             word-break: break-word;
             z-index: 30;
             pointer-events: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            line-height: 1.4;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+            line-height: 1.5;
         }
-        @media (max-width: 600px) {
-            .ar-label { font-size: 10px; padding: 6px 12px; bottom: 12px; }
-            #info { font-size: 10px; top: 10px; left: 10px; }
-            #controls-hint { font-size: 9px; bottom: 12px; right: 12px; }
+        #controls-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            color: #ccc;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            z-index: 30;
+            pointer-events: none;
+        }
+        @media (max-width: 700px) {
+            .logo-left img, .logo-right img { height: 35px; }
+            .title-center { font-size: 9px; padding: 4px 12px; white-space: normal; }
+            .ar-label { font-size: 10px; padding: 6px 14px; bottom: 12px; }
+            #controls-hint { font-size: 8px; bottom: 12px; right: 12px; }
+        }
+        @media (max-width: 480px) {
+            .logo-left img, .logo-right img { height: 28px; }
+            .title-center { font-size: 8px; }
         }
     </style>
 </head>
 <body>
-    <div id="info">
-        🔬 Projet de surveillance du glissement de terrain<br>
-        📍 El Biar & Telemly – InSAR + Lasergrammétrie 3D
+    <!-- Interface haute : logo gauche, titre centré, logo droit -->
+    <div class="ui-top">
+        <div class="logo-left">
+            <img src="./models/logo.jpg" alt="Logo" onerror="this.style.display='none'">
+        </div>
+        <div class="title-center">
+            <span>🔬 Projet de surveillance du glissement de terrain<br>📍 El Biar & Telemly – InSAR + Lasergrammétrie 3D</span>
+        </div>
+        <div class="logo-right">
+            <img src="./models/Faro_s150.jpg" alt="Faro s150" onerror="this.style.display='none'">
+        </div>
     </div>
+
     <div id="controls-hint">
         🖱️ Un doigt = rotation | Deux doigts = zoom
     </div>
+
+    <!-- Nouvelle étiquette basse (texte modifié) -->
     <div class="ar-label">
-        📐 Projet portant surveillance du glissement de terrain au niveau d'El Biar et Telemly par techniques de géodésie spatiale (InSAR) et de Lasergrammétrie Terrestre 3D
+        📐 Projet portant surveillance du phénomène de glissement de terrain au niveau d'El Biar et Telemly à l'aide de l'outil spatial afin de prévenir les dangers.
     </div>
 
     <script type="importmap">
@@ -77,14 +140,12 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        // Scène avec fond personnalisé (Telemly.jpg)
         const scene = new THREE.Scene();
-        
-      
         const textureLoader = new THREE.TextureLoader();
-        //  'fond.jpg'
         scene.background = textureLoader.load('./models/Telemly.jpg');
-       
 
+        // Caméra dézoomée
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(3.5, 2.5, 5);
         camera.lookAt(0, 0, 0);
@@ -95,6 +156,7 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
+        // Contrôles interactifs
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
@@ -105,7 +167,7 @@
         controls.touchRotate = true;
         controls.touchZoom = true;
 
-        // Éclairage (ajustable selon ton image)
+        // Éclairage (pour bien voir le modèle)
         const ambientLight = new THREE.AmbientLight(0xcccccc);
         scene.add(ambientLight);
         const dirLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -119,7 +181,7 @@
         fillLight.position.set(0, -1, 0);
         scene.add(fillLight);
 
-        // Modèle GLB (17 Mo)
+        // Chargement du modèle 3D (17 Mo)
         const modelPath = './models/mon-modele.glb';
         const loader = new GLTFLoader();
         let model = null;
@@ -135,7 +197,7 @@
             },
             (error) => {
                 console.error('Erreur chargement modèle :', error);
-                document.getElementById('info').innerHTML += '<br>⚠️ Modèle introuvable';
+                // Afficher un message dans la console mais pas d'alerte intrusive
             }
         );
 
