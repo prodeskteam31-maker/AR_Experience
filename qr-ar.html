@@ -14,18 +14,18 @@
         /* ── BARRE SUPÉRIEURE ── */
         .top-bar {
             position: absolute;
-            top: 16px;
-            left: 16px;
-            right: 16px;
+            top: 20px;
+            left: 20px;
+            right: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 16px;
             z-index: 30;
             pointer-events: none;
         }
 
-        /* LOGOS : transparents, directement sur le fond image - TAILLE AUGMENTÉE */
+        /* LOGOS : grands, transparents, directement sur fond image */
         .logo-left, .logo-right {
             flex-shrink: 0;
             background: none;
@@ -36,28 +36,29 @@
             backdrop-filter: none;
         }
         .logo-left img, .logo-right img {
-            height: 70px;         /* plus grand */
+            height: 80px;
             width: auto;
             display: block;
             object-fit: contain;
-            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.55));
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
         }
 
-        /* TITRE : texte flottant SANS boîte ni étiquette */
+        /* TITRE : grand, lisible, SANS boîte */
         .title {
             flex: 1;
             text-align: center;
             color: #ffffff;
-            font-size: 14px;
-            font-weight: 700;
-            line-height: 1.45;
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.5;
+            letter-spacing: 0.4px;
             text-shadow:
-                0 0 14px rgba(0,0,0,0.95),
-                0 2px 8px rgba(0,0,0,0.85),
-                0 0 2px rgba(0,0,0,1);
+                0 0 18px rgba(0,0,0,1),
+                0 2px 10px rgba(0,0,0,0.95),
+                0 0 4px rgba(0,0,0,1),
+                1px 1px 0px rgba(0,0,0,0.8);
             background: none;
             padding: 0;
-            letter-spacing: 0.3px;
         }
 
         /* ÉTIQUETTE BAS */
@@ -68,7 +69,7 @@
             right: 20px;
             background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(10px);
-            padding: 12px 18px;
+            padding: 12px 20px;
             border-radius: 12px;
             color: white;
             font-size: 14px;
@@ -77,7 +78,7 @@
             text-align: center;
             z-index: 30;
             pointer-events: none;
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.35);
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
@@ -96,20 +97,19 @@
         }
 
         @media (max-width: 700px) {
-            .logo-left img, .logo-right img { height: 45px; }
-            .title { font-size: 11px; }
+            .logo-left img, .logo-right img { height: 55px; }
+            .title { font-size: 12px; }
             .bottom-label { font-size: 11px; padding: 8px 14px; bottom: 12px; left: 12px; right: 12px; }
         }
         @media (max-width: 480px) {
-            .logo-left img, .logo-right img { height: 35px; }
-            .title { font-size: 9px; }
+            .logo-left img, .logo-right img { height: 40px; }
+            .title { font-size: 10px; }
             .bottom-label { font-size: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Barre supérieure -->
     <div class="top-bar">
         <div class="logo-left">
             <img src="./models/logo.jpg" alt="Logo" onerror="this.style.display='none'">
@@ -119,13 +119,12 @@
             📍 El Biar & Telemly – InSAR + Lasergrammétrie 3D
         </div>
         <div class="logo-right">
-            <img src="./models/Faro_s150.jpg" alt="Faro s150" onerror="this.style.display='none'">
+            <img src="./models/Faro_s150.png" alt="Faro s150" onerror="this.style.display='none'">
         </div>
     </div>
 
     <div id="controls-hint">🖱️ 1 doigt = rotation | 2 doigts = zoom</div>
 
-    <!-- Étiquette bas -->
     <div class="bottom-label">
         📐 Projet portant surveillance du phénomène de glissement de terrain au niveau d'El Biar et Telemly à l'aide de l'outil spatial afin de prévenir les dangers.
     </div>
@@ -152,10 +151,10 @@
         backgroundTexture.magFilter = THREE.LinearFilter;
         scene.background = backgroundTexture;
 
-        // ── CAMÉRA ──
-        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 2, 10);
-        camera.lookAt(0, 0, 0);
+        // ── CAMÉRA : éloignée = modèle petit au départ ──
+        const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.5, 14);
+        camera.lookAt(0, 0.5, 0);
 
         // ── RENDERER ──
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -166,7 +165,7 @@
 
         // ── CONTRÔLES ──
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.target.set(0, 0, 0);
+        controls.target.set(0, 0.5, 0);   // orbite centrée, légèrement montée
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
         controls.rotateSpeed = 0.8;
@@ -188,30 +187,32 @@
         rimLight.position.set(1, 2, -2);
         scene.add(rimLight);
 
-        // ── CHARGEMENT MODÈLE ──
+        // ── CHARGEMENT DU MODÈLE ──
         const loader = new GLTFLoader();
         loader.load('./models/mon-modele.glb',
             (gltf) => {
                 const model = gltf.scene;
 
-                // Centrer le modèle sur l'origine
+                // 1. Centrer sur l'origine
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
+                const size   = box.getSize(new THREE.Vector3());
                 model.position.sub(center);
 
-                // Réduire l'échelle et remonter le modèle
+                // 2. Échelle réduite → petit au départ
                 model.scale.set(0.35, 0.35, 0.35);
-                model.position.y += 0.4;   // monté
+
+                // 3. Remonter le modèle (Y + 20% de sa hauteur après scale)
+                model.position.y += size.y * 0.35 * 0.20;
 
                 scene.add(model);
-                console.log('Modèle chargé, centré, réduit & remonté');
+                console.log('Modèle chargé ✓');
             },
             (xhr) => {
-                console.log(`Chargement : ${Math.round(xhr.loaded / xhr.total * 100)}%`);
+                if (xhr.total) console.log(`${Math.round(xhr.loaded / xhr.total * 100)}%`);
             },
             (error) => {
                 console.error('Erreur chargement modèle :', error);
-                document.querySelector('.bottom-label').innerHTML += '<br><span style="color:#ff9999">⚠️ Modèle introuvable</span>';
             }
         );
 
