@@ -40,6 +40,20 @@
             line-height: 1.5;
             text-shadow: 0 0 18px black, 0 2px 10px black;
             background: none;
+            font-family: 'Courier New', 'Segoe UI', monospace;
+            min-height: 60px;
+        }
+        /* Curseur clignotant pour l'effet typewriter */
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            margin-left: 4px;
+            background-color: white;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
         .bottom-label {
             position: fixed;
@@ -73,12 +87,12 @@
         }
         @media (max-width: 700px) {
             .logo-left img, .logo-right img { height: 55px; }
-            .title { font-size: 12px; }
+            .title { font-size: 12px; min-height: 50px; }
             .bottom-label { font-size: 14px; padding: 12px 16px; }
         }
         @media (max-width: 480px) {
             .logo-left img, .logo-right img { height: 70px; }
-            .title { font-size: 10px; }
+            .title { font-size: 10px; min-height: 45px; }
             .bottom-label { font-size: 12px; padding: 10px 12px; }
         }
     </style>
@@ -86,10 +100,10 @@
 <body>
     <div class="top-bar">
         <div class="logo-left"><img src="./models/logo.png" alt="Logo" onerror="this.style.display='none'"></div>
-        <div class="title">🔬 Suivi du phénomène de glissement de terrain à l'aide de l'outil spatial <br>📍 El Biar & Telemly <br>– InSAR + Lasergrammétrie 3D</div>
+        <div class="title" id="typewriter-title"></div>
         <div class="logo-right"><img src="./models/Faro_s150.png" alt="Faro" onerror="this.style.display='none'"></div>
     </div>
-    <div id="controls-hint">🔍 Pincer = zoom | 🎬 Rotation automatique</div>
+    <div id="controls-hint">🎬 Rotation automatique du modèle</div>
 
     <div class="bottom-label">
         ✨ يهدف هذا المشروع إلى مراقبة الانزلاقات الأرضية في منطقة الأبيار – تلملي باستخدام تقنيات حديثة، من أجل اكتشاف حركة التربة في الوقت المناسب والوقاية من الأخطار ✨
@@ -109,6 +123,34 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        // ========== EFFET TYPEWRITER ==========
+        const titleText = "🔬 Suivi du phénomène de glissement de terrain à l'aide de l'outil spatial \n📍 El Biar & Telemly \n– InSAR + Lasergrammétrie 3D";
+        const titleElement = document.getElementById('typewriter-title');
+        let i = 0;
+        
+        function typeWriter() {
+            if (i < titleText.length) {
+                let char = titleText[i];
+                if (char === '\n') {
+                    titleElement.innerHTML += '<br>';
+                } else {
+                    titleElement.innerHTML += char;
+                }
+                i++;
+                setTimeout(typeWriter, 50); // vitesse d'écriture (50ms par caractère)
+            } else {
+                // Ajouter un curseur clignotant à la fin
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor';
+                cursor.innerHTML = '|';
+                titleElement.appendChild(cursor);
+            }
+        }
+        
+        // Démarrer l'animation typewriter après le chargement de la page
+        setTimeout(typeWriter, 500);
+
+        // ========== SCÈNE 3D ==========
         const scene = new THREE.Scene();
         const textureLoader = new THREE.TextureLoader();
         const bgTexture = textureLoader.load('./models/Telemly.jpg');
@@ -125,15 +167,14 @@
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        // CONTRÔLES : zoom uniquement, pas de rotation manuelle, pas de pan
+        // Contrôles : tout désactivé, uniquement rotation auto
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.target.set(0, 0, 0);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.enableZoom = true;          // ← zoom activé
-        controls.zoomSpeed = 1.0;
-        controls.enableRotate = false;       // ← rotation manuelle désactivée
-        controls.enablePan = false;          // ← déplacement désactivé
+        controls.enableZoom = false;
+        controls.enableRotate = false;
+        controls.enablePan = false;
         controls.update();
 
         // Éclairage
@@ -149,7 +190,7 @@
         rimLight.position.set(1, 2, -2);
         scene.add(rimLight);
 
-        // Chargement du modèle
+        // Chargement du modèle 3D
         const loader = new GLTFLoader();
         let currentModel = null;
 
@@ -164,11 +205,10 @@
                 const center = box.getCenter(new THREE.Vector3());
                 currentModel.position.sub(center);
 
-                // Position verticale (ajuste selon besoin)
                 currentModel.position.y += -0.8;
 
                 scene.add(currentModel);
-                console.log('Modèle chargé - zoom seul, rotation auto');
+                console.log('Modèle chargé - rotation auto');
             },
             (xhr) => console.log(`${Math.round(xhr.loaded / xhr.total * 100)}%`),
             (error) => console.error('Erreur :', error)
